@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./services/backend
+    container_name: ${APP_NAME}-backend
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    volumes:
+      - ./app/backend:/var/www/backend
+    ports:
+      - 9000:9000
+
+  nginx:
+    build:
+      context: ./services/nginx
+    container_name: ${APP_NAME}-nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./services/nginx/etc/nginx/conf.d/:/etc/nginx/conf.d/
+      - ./app/backend:/var/www/backend
+
+  mysql:
+    build:
+      context: ./services/mysql
+    container_name: ${APP_NAME}-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./var/mysql/data:/var/lib/mysql:z
+    ports:
+      - 3306:3306
